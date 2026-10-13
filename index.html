@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cute Dog</title>
+<style>
+  :root { --bg:#fdf1dc; --bg2:#f9d9a8; }
+  * { box-sizing: border-box; margin: 0; }
+  html, body { height: 100%; }
+  body {
+    display: grid; place-items: center; overflow: hidden;
+    background: radial-gradient(circle at 50% 40%, var(--bg), var(--bg2));
+    font-family: system-ui, sans-serif;
+  }
+  svg { width: min(80vmin, 520px); height: auto; overflow: visible; }
+  .hint { position: fixed; bottom: 20px; width: 100%; text-align: center; color: #a47a45; font-size: 14px; }
+  #tail { transform-origin: 300px 410px; animation: wag .5s ease-in-out infinite alternate; }
+  @keyframes wag { from { transform: rotate(-14deg); } to { transform: rotate(16deg); } }
+  #head { animation: bob 3s ease-in-out infinite; transform-origin: 250px 400px; }
+  @keyframes bob { 50% { transform: translateY(-4px) rotate(1deg); } }
+  #lids { animation: blink 4s infinite; transform-origin: center; }
+  @keyframes blink { 0%, 94%, 100% { opacity: 0; } 96%, 98% { opacity: 1; } }
+  #tongue { animation: pant 1s ease-in-out infinite alternate; transform-origin: 250px 318px; }
+  @keyframes pant { to { transform: scaleY(1.12); } }
+</style>
+</head>
+<body>
+<svg viewBox="0 0 500 500" aria-label="A cute dog whose eyes follow the cursor">
+  <ellipse cx="250" cy="468" rx="130" ry="14" fill="#000" opacity=".1"/>
+  <!-- tail -->
+  <g id="tail"><path d="M300 410 Q360 380 350 320" stroke="#c98a4b" stroke-width="26" fill="none" stroke-linecap="round"/></g>
+  <!-- body -->
+  <ellipse cx="250" cy="415" rx="82" ry="58" fill="#d99a58"/>
+  <ellipse cx="250" cy="430" rx="48" ry="40" fill="#fbe6c4"/>
+  <ellipse cx="205" cy="462" rx="24" ry="14" fill="#fbe6c4"/>
+  <ellipse cx="295" cy="462" rx="24" ry="14" fill="#fbe6c4"/>
+
+  <g id="head">
+    <!-- ears -->
+    <path d="M150 190 Q95 200 108 305 Q150 330 178 250 Z" fill="#8a5528"/>
+    <path d="M350 190 Q405 200 392 305 Q350 330 322 250 Z" fill="#8a5528"/>
+    <!-- head -->
+    <ellipse cx="250" cy="250" rx="115" ry="105" fill="#e8aa63"/>
+    <!-- face blaze -->
+    <path d="M250 150 Q290 190 285 260 L215 260 Q210 190 250 150Z" fill="#fbe6c4"/>
+    <ellipse cx="250" cy="300" rx="62" ry="48" fill="#fbe6c4"/>
+    <!-- cheeks -->
+    <circle cx="165" cy="295" r="17" fill="#f5a3a3" opacity=".55"/>
+    <circle cx="335" cy="295" r="17" fill="#f5a3a3" opacity=".55"/>
+    <!-- eyes -->
+    <circle cx="200" cy="240" r="30" fill="#fff"/>
+    <circle cx="300" cy="240" r="30" fill="#fff"/>
+    <g id="pupils">
+      <g class="pupil" data-cx="200" data-cy="240">
+        <circle r="17" fill="#2b1a10"/><circle cx="-5" cy="-6" r="6" fill="#fff"/><circle cx="6" cy="6" r="2.5" fill="#fff"/>
+      </g>
+      <g class="pupil" data-cx="300" data-cy="240">
+        <circle r="17" fill="#2b1a10"/><circle cx="-5" cy="-6" r="6" fill="#fff"/><circle cx="6" cy="6" r="2.5" fill="#fff"/>
+      </g>
+    </g>
+    <g id="lids" fill="#e8aa63"><circle cx="200" cy="240" r="31"/><circle cx="300" cy="240" r="31"/></g>
+    <!-- brows -->
+    <path d="M172 200 Q200 188 226 200" stroke="#8a5528" stroke-width="6" fill="none" stroke-linecap="round"/>
+    <path d="M274 200 Q300 188 328 200" stroke="#8a5528" stroke-width="6" fill="none" stroke-linecap="round"/>
+    <!-- nose & mouth -->
+    <ellipse cx="250" cy="288" rx="20" ry="14" fill="#2b1a10"/>
+    <ellipse cx="244" cy="283" rx="6" ry="3.5" fill="#fff" opacity=".6"/>
+    <path d="M250 302 L250 316 M250 316 Q232 334 214 316 M250 316 Q268 334 286 316" stroke="#2b1a10" stroke-width="4.5" fill="none" stroke-linecap="round"/>
+    <path id="tongue" d="M236 324 Q250 366 264 324 Z" fill="#f2788a"/>
+  </g>
+</svg>
+<div class="hint">Move your cursor around 🐶</div>
+
+<script>
+  const pupils = [...document.querySelectorAll('.pupil')];
+  const svg = document.querySelector('svg');
+  const MAX = 11; // max pupil travel in SVG units
+  let tx = null, ty = null;
+
+  function look(x, y) {
+    const r = svg.getBoundingClientRect();
+    const k = 500 / r.width;
+    for (const p of pupils) {
+      const cx = +p.dataset.cx, cy = +p.dataset.cy;
+      const dx = (x - r.left) * k - cx, dy = (y - r.top) * k - cy;
+      const d = Math.hypot(dx, dy) || 1;
+      const m = Math.min(MAX, d / 8);
+      p.setAttribute('transform', `translate(${cx + dx / d * m} ${cy + dy / d * m})`);
+    }
+  }
+  look(innerWidth / 2, innerHeight / 2 + 200);
+  addEventListener('pointermove', e => { tx = e.clientX; ty = e.clientY; look(tx, ty); });
+  addEventListener('resize', () => tx !== null && look(tx, ty));
+</script>
+</body>
+</html>
